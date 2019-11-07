@@ -19,39 +19,53 @@
     <p class="lead">A simple calendar app for scheduling your work day</p>
     <p id="currentDay" class="lead"></p>
   </header>
-  <div class="container wrapper">
+  <div class="container">
     <!-- Timeblocks go here -->
-    <div class="row timeblock">
+    <div class="row" id="9">
       <div class="col-2 col-sm-1 align-self-center hour"></div>
-      <div class="col event" contentEditable="true">
+      <div class="col px-10 mx-10 event" contentEditable="true">
       </div>
-      <div class="col-2 col-sm-1 save">
-        <button type="button" class="btn btn-primary save">Save</button>
+      <div class="col-2 col-sm-1 align-self-center px-1 save">
+        <button type="button" class="btn saveBtn">Save</button>
       </div>
     </div>
-
+    
+    </div>
 
   </div>
   <!-- scripts-->
   <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
-    integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous">
-  </script>
-  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
-    integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous">
-  </script>
   <script>
-    function saveEvent() {
-      localStorage.setItem("event", JSON.stringify($(".event").html()));
-    }
- 
-    var event = JSON.parse(localStorage.getItem("event"));
+    $("#currentDay").html(moment().format('LL'));
 
-    // jQuery
-    $("#currentDay").html(moment().format('LLLL'));
-    $(".event").html(`${event}`);
-    $(".save").click(saveEvent);
+    $(".row").each(function () {
+      var row = $(this);
+      var id = row.get(0).id;
+      var m = moment(`${id}`, "H");
+
+      // Set left div (hour) html
+      row.children(".hour").html(m.format("h A"));
+
+      // Set middle div (event) time class
+      if (m.isBefore(moment(), 'hour')) {
+        row.children(".event").addClass("past");
+      } else if (m.isSame(moment(), 'hour')) {
+        row.children(".event").addClass("present");
+      } else if (m.isAfter(moment(), 'hour')) {
+        row.children(".event").addClass("future");
+      };
+
+      // Set middle div (event) html
+      row.children(".event").html(JSON.parse( localStorage.getItem(`event:${id}`) ));
+
+      // Set event val to localstorage
+      function saveEvent() {
+        localStorage.setItem(`event:${id}`, JSON.stringify(row.children(".event").text()));
+      }
+      row.find("button").on("click", saveEvent);
+
+    });
   </script>
 </body>
 
